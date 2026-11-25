@@ -1,0 +1,122 @@
+[
+    {
+        "Ticker":  "AAPL",
+        "Company":  "Apple Inc.",
+        "PeriodEnd":  "2023-09-30",
+        "Filed":  "2023-11-03",
+        "Accession":  "0000320193-23-000106",
+        "Document":  "aapl-20230930.htm"
+    },
+    {
+        "Ticker":  "AAPL",
+        "Company":  "Apple Inc.",
+        "PeriodEnd":  "2024-09-28",
+        "Filed":  "2024-11-01",
+        "Accession":  "0000320193-24-000123",
+        "Document":  "aapl-20240928.htm"
+    },
+    {
+        "Ticker":  "AAPL",
+        "Company":  "Apple Inc.",
+        "PeriodEnd":  "2025-09-27",
+        "Filed":  "2025-10-31",
+        "Accession":  "0000320193-25-000079",
+        "Document":  "aapl-20250927.htm"
+    },
+    {
+        "Ticker":  "AMZN",
+        "Company":  "AMAZON COM INC",
+        "PeriodEnd":  "2023-12-31",
+        "Filed":  "2024-02-02",
+        "Accession":  "0001018724-24-000008",
+        "Document":  "amzn-20231231.htm"
+    },
+    {
+        "Ticker":  "AMZN",
+        "Company":  "AMAZON COM INC",
+        "PeriodEnd":  "2024-12-31",
+        "Filed":  "2025-02-07",
+        "Accession":  "0001018724-25-000004",
+        "Document":  "amzn-20241231.htm"
+    },
+    {
+        "Ticker":  "AMZN",
+        "Company":  "AMAZON COM INC",
+        "PeriodEnd":  "2025-12-31",
+        "Filed":  "2026-02-06",
+        "Accession":  "0001018724-26-000004",
+        "Document":  "amzn-20251231.htm"
+    },
+    {
+        "Ticker":  "GOOGL",
+        "Company":  "Alphabet Inc.",
+        "PeriodEnd":  "2023-12-31",
+        "Filed":  "2024-01-31",
+        "Accession":  "0001652044-24-000022",
+        "Document":  "goog-20231231.htm"
+    },
+    {
+        "Ticker":  "GOOGL",
+        "Company":  "Alphabet Inc.",
+        "PeriodEnd":  "2024-12-31",
+        "Filed":  "2025-02-05",
+        "Accession":  "0001652044-25-000014",
+        "Document":  "goog-20241231.htm"
+    },
+    {
+        "Ticker":  "GOOGL",
+        "Company":  "Alphabet Inc.",
+        "PeriodEnd":  "2025-12-31",
+        "Filed":  "2026-02-05",
+        "Accession":  "0001652044-26-000018",
+        "Document":  "goog-20251231.htm"
+    },
+    {
+        "Ticker":  "MSFT",
+        "Company":  "MICROSOFT CORP",
+        "PeriodEnd":  "2023-06-30",
+        "Filed":  "2023-07-27",
+        "Accession":  "0000950170-23-035122",
+        "Document":  "msft-20230630.htm"
+    },
+    {
+        "Ticker":  "MSFT",
+        "Company":  "MICROSOFT CORP",
+        "PeriodEnd":  "2024-06-30",
+        "Filed":  "2024-07-30",
+        "Accession":  "0000950170-24-087843",
+        "Document":  "msft-20240630.htm"
+    },
+    {
+        "Ticker":  "MSFT",
+        "Company":  "MICROSOFT CORP",
+        "PeriodEnd":  "2025-06-30",
+        "Filed":  "2025-07-30",
+        "Accession":  "0000950170-25-100235",
+        "Document":  "msft-20250630.htm"
+    },
+    {
+        "Ticker":  "NVDA",
+        "Company":  "NVIDIA CORP",
+        "PeriodEnd":  "2023-01-29",
+        "Filed":  "2023-02-24",
+        "Accession":  "0001045810-23-000017",
+        "Document":  "nvda-20230129.htm"
+    },
+    {
+        "Ticker":  "NVDA",
+        "Company":  "NVIDIA CORP",
+        "PeriodEnd":  "2024-01-28",
+        "Filed":  "2024-02-21",
+        "Accession":  "0001045810-24-000029",
+        "Document":  "nvda-20240128.htm"
+    },
+    {
+        "Ticker":  "NVDA",
+        "Company":  "NVIDIA CORP",
+        "PeriodEnd":  "2025-01-26",
+        "Filed":  "2025-02-26",
+        "Accession":  "0001045810-25-000023",
+        "Document":  "nvda-20250126.htm"
+    }
+]
