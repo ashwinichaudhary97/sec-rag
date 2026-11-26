@@ -43,3 +43,71 @@ Raw and normalized files are excluded from Git.
 Section extraction is incomplete for some elements. Unassigned
 content is retained without inventing section labels. Repeated
 running headers are removed when recovering missing element offsets.
+
+## Evaluation dataset
+
+The evaluation dataset contains 100 questions based on corpus v1.
+
+| Category | Development | Heldout |
+|---|---:|---:|
+| Single-hop | 14 | 7 |
+| Exact-term | 14 | 6 |
+| Multi-hop | 14 | 5 |
+| Adversarial | 12 | 5 |
+| Table lookup | 16 | 7 |
+| Total | 70 | 30 |
+
+- `data/eval/dev.jsonl`: development questions
+- `data/eval/heldout.jsonl`: heldout questions
+
+The development and heldout splits contain 8 and 4 unanswerable
+questions respectively.
+
+### Annotation format
+
+Example from the development dataset:
+
+```json
+{
+  "question_id": "Q002",
+  "question": "How many full-time and part-time employees did Amazon have at the end of 2024?",
+  "category": "single_hop",
+  "adversarial_subtype": null,
+  "answerable": true,
+  "reference_answer": "Approximately 1,556,000.",
+  "gold_evidence": [
+    {
+      "unit_id": "G1",
+      "locations": [
+        {
+          "accession": "0001018724-25-000004",
+          "start": 14240,
+          "end": 14335,
+          "text": "As of December 31, 2024, we employed approximately 1,556,000 full-time and part-time employees."
+        }
+      ]
+    }
+  ],
+  "expected_constraints": {
+    "tickers": [
+      "AMZN"
+    ],
+    "filing_years": []
+  },
+  "annotation_note": ""
+}
+```
+
+Evidence offsets refer to the normalized filing text, with an inclusive
+start and exclusive end. All evidence units are required, but alternative
+locations within a unit are interchangeable.
+
+Unanswerable questions have a null reference answer and empty gold
+evidence. Empty metadata constraint lists indicate no restriction.
+Filing years refer to the fiscal year covered by the requested filing,
+rather than the reporting period of an individual financial figure.
+
+Questions were prepared with LLM assistance and manually verified
+in two separate review passes within a week. Reference answers and
+supporting evidence were checked against the original SEC filings.
+Both splits were frozen after structural validation and overlap checks.

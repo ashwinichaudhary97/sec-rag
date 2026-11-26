@@ -45,3 +45,26 @@ Limitations: incomplete section assignments and sampled rather than
 exhaustive financial content validation.
 
 Corpus v1 frozen using the hashes in data/manifest.json.
+
+## Step 2 - Evaluation dataset
+
+- Dataset version: v1
+- Corpus version: v1
+- Prepared 10 pilot questions before completing the development split.
+- Questions prepared with LLM assistance and manually verified in
+  two separate passes within a week.
+- Reference answers and supporting evidence checked against SEC filings.
+- Heldout questions prepared separately from the development set.
+- Checked development and heldout questions for overlap.
+- Verified all 158 evidence locations against normalized filing text.
+- Question uniqueness, schema, metadata constraints and corpus integrity
+  checks passed.
+- Both datasets frozen after structural validation.
+
+### Dataset hashes (SHA-256)
+
+Development:
+09977be282f26ade4595b0444424780093f0afb84cf719b1972c59198ea00238
+
+Heldout:
+e04b947d06a37a4a128f681aad636cb878028214142f636ed1969b5838a99129
