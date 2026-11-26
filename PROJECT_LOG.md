@@ -77,3 +77,48 @@ e04b947d06a37a4a128f681aad636cb878028214142f636ed1969b5838a99129
 - Tested accession matching, span containment, alternative evidence
   locations, recall cutoffs and nDCG normalization.
 - All 15 unit tests passed, including 9 retrieval evaluation tests.
+
+## Step 4 - Dense retrieval (E00)
+
+Parent commit: `a7d52d1`
+
+Corpus and evaluation dataset: v1
+
+Configuration: `configs/baseline.yaml`
+
+### Implementation decisions
+
+Used structure-aware chunking to retain financial table context
+and trace retrieved evidence back to the original filings.
+Multiple source spans support repeated table headers without
+incorrectly treating omitted content as retrieved evidence.
+
+Corpus validation found no missing content within parsed elements.
+Two uncovered characters outside elements belonged to a standalone
+page number.
+
+After correcting span handling and table boundaries, 72 of 76
+development evidence units were available within individual chunks.
+The remaining four were retained as a baseline limitation.
+
+### Observations
+
+Embedding and indexing took 444.8 seconds on CPU, producing
+an 11.44 MiB FAISS index.
+
+Table lookup was the weakest retrieval category. Although 87.50%
+of its evidence units were available in the index, Recall@10
+was only 37.50%, indicating a retrieval limitation beyond chunking.
+
+The retrieval smoke test returned similar Microsoft disclosures
+from multiple filing years, highlighting the limitations of
+unrestricted semantic search.
+
+### Verification
+
+Corpus hashes, source spans, token limits, embedding normalization
+and saved index dimensions were verified. All 30 unit tests and
+the real-index retrieval smoke test passed.
+
+Development retrieval results are recorded in `results/E00/`.
+The heldout dataset was not used.

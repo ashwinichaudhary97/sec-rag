@@ -12,8 +12,22 @@ from sec_rag.evaluation import (
 def chunk(accession, start, end):
     return {
         "accession": accession,
+        "source_spans": [{"start": start, "end": end}],
+    }
+
+
+def location(accession, start, end):
+    return {
+        "accession": accession,
         "start": start,
         "end": end,
+    }
+
+
+def multi_span_chunk(accession, spans):
+    return {
+        "accession": accession,
+        "source_spans": [{"start": start, "end": end} for start, end in spans],
     }
 
 
@@ -23,14 +37,14 @@ def gold():
         {
             "unit_id": "G1",
             "locations": [
-                chunk("filing-a", 10, 20),
-                chunk("filing-b", 30, 40),
+                location("filing-a", 10, 20),
+                location("filing-b", 30, 40),
             ],
         },
         {
             "unit_id": "G2",
             "locations": [
-                chunk("filing-a", 50, 60),
+                location("filing-a", 50, 60),
             ],
         },
     ]
@@ -110,3 +124,36 @@ def test_unanswerable_question():
 
     with pytest.raises(ValueError):
         ndcg_at_k([], [], [], 5)
+
+
+def test_contiguous_spans(gold):
+    candidate = multi_span_chunk("filing-a", [(5, 15), (15, 25)])
+
+    assert covered_units(candidate, gold) == {"G1"}
+
+
+def test_overlapping_spans(gold):
+    candidate = multi_span_chunk("filing-a", [(14, 25), (5, 16)])
+
+    assert covered_units(candidate, gold) == {"G1"}
+
+
+def test_discontinuous_spans(gold):
+    candidate = multi_span_chunk("filing-a", [(5, 14), (15, 25), (45, 65)])
+
+    assert covered_units(candidate, gold) == {"G2"}
+
+
+def test_evidence_cannot_span_multiple_chunks(gold):
+    retrieved = [
+        chunk("filing-a", 5, 15),
+        chunk("filing-a", 15, 25),
+    ]
+
+    assert evidence_recall_at_k(retrieved, gold, 5) == 0.0
+
+
+def test_single_result_ndcg(gold):
+    indexed = [chunk("filing-a", 0, 25)]
+
+    assert ndcg_at_k(indexed, indexed, gold, 1) == 1.0

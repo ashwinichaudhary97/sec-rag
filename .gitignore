@@ -21,3 +21,5 @@ wheels/
 # Local data
 data/raw/
 data/corpus/
+
+data/indexes/

@@ -126,3 +126,37 @@ nDCG uses binary chunk relevance and scikit-learn's ndcg_score,
 with the ideal ranking based on relevance across the complete index.
 
 Retrieval quality metrics apply to answerable questions.
+
+## Dense retrieval
+
+The retrieval pipeline splits filings into text and table chunks
+while preserving their original source offsets. Chunks are limited
+to 224 embedding tokens, with table headers repeated where needed.
+
+The baseline uses all-MiniLM-L6-v2 embeddings and FAISS IndexFlatIP
+for cosine similarity search.
+
+### Run retrieval evaluation
+
+```bash
+uv run --locked python scripts/build_index.py
+uv run --locked python scripts/evaluate_retrieval.py
+```
+
+Settings are maintained in `configs/baseline.yaml`.
+
+### Baseline results
+
+| Metric | Development set |
+|---|---:|
+| Evidence Recall@5 | 45.16% |
+| Evidence Recall@10 | 66.94% |
+| nDCG@5 | 0.3184 |
+| nDCG@10 | 0.3884 |
+| p95 retrieval latency | 41.02 ms |
+
+The index contains 7,807 chunks from 15 filings. Retrieval quality
+is evaluated on 62 answerable questions, with latency measured
+across all 70 development questions.
+
+Detailed results are stored in `results/E00/`.
