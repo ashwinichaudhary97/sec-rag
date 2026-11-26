@@ -8,15 +8,13 @@ from time import perf_counter
 import faiss
 import numpy as np
 import yaml
-from sentence_transformers import SentenceTransformer
+from sentence_transformers import CrossEncoder, SentenceTransformer
 
 from sec_rag.evaluation import evidence_recall_at_k, ndcg_at_k
-from sec_rag.filtered_retrieval import (
-    filtered_hybrid_search,
-    load_embeddings,
-)
+from sec_rag.filtered_retrieval import filtered_hybrid_search, load_embeddings
 from sec_rag.hybrid import build_bm25, hybrid_search
 from sec_rag.metadata import extract_constraints
+from sec_rag.reranking import rerank
 from sec_rag.retrieval import dense_search
 
 
@@ -35,13 +33,13 @@ def compare_constraints(predicted, expected):
 
 
 def summarize(results):
-    answerable = [result for result in results if result["answerable"]]
+    answerable = [r for r in results if r["answerable"]]
 
     summary = {
         "questions": len(results),
         "answerable_questions": len(answerable),
         "p95_retrieval_ms": float(
-            np.percentile([result["retrieval_ms"] for result in results], 95)
+            np.percentile([r["retrieval_ms"] for r in results], 95)
         ),
     }
 
@@ -52,14 +50,12 @@ def summarize(results):
         "ndcg_at_10",
     ):
         summary[metric] = (
-            float(np.mean([result[metric] for result in answerable]))
-            if answerable
-            else None
+            float(np.mean([r[metric] for r in answerable])) if answerable else None
         )
 
     if "constraints_correct" in results[0]:
         summary["constraint_accuracy"] = float(
-            np.mean([result["constraints_correct"] for result in results])
+            np.mean([r["constraints_correct"] for r in results])
         )
 
     return summary
@@ -67,10 +63,7 @@ def summarize(results):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--config",
-        default="configs/baseline.yaml",
-    )
+    parser.add_argument("--config", default="configs/baseline.yaml")
     args = parser.parse_args()
 
     config = yaml.safe_load(Path(args.config).read_text(encoding="utf-8"))
@@ -78,10 +71,10 @@ def main():
     experiment_id = config["experiment_id"]
     settings = config["embedding"]
     retrieval = config["retrieval"]
+    reranking = config.get("reranking")
     method = retrieval.get("method", "dense")
 
     dev_path = Path("data/eval/dev.jsonl")
-
     dataset_hash = hashlib.sha256(dev_path.read_bytes()).hexdigest()
 
     if dataset_hash != (
@@ -92,7 +85,6 @@ def main():
     questions = load_jsonl(dev_path)
 
     index_experiment = config.get("index_experiment", experiment_id)
-
     directory = Path("data/indexes") / index_experiment
 
     chunks = load_jsonl(directory / "chunks.jsonl")
@@ -156,15 +148,38 @@ def main():
     else:
         raise ValueError(f"Unknown retrieval method: {method}")
 
+    if reranking:
+        print("Loading cross-encoder...", flush=True)
+
+        reranker = CrossEncoder(
+            reranking["model_id"],
+            revision=reranking["revision"],
+            device=reranking["device"],
+        )
+
+    def retrieve(question):
+        candidates = search(question)
+
+        if reranking:
+            return rerank(
+                question,
+                candidates,
+                reranker,
+                k=final_k,
+                batch_size=reranking["batch_size"],
+            )
+
+        return candidates[:final_k]
+
     print("Experiment:", experiment_id)
     print("Retrieval method:", method)
+    print("Reranking:", bool(reranking))
     print("Indexed chunks:", len(chunks))
 
-    # Warm up before measuring retrieval latency.
-    search("What does a company disclose in its annual report?")
+    retrieve("What does a company disclose in its annual report?")
 
     if method == "filtered_hybrid":
-        search("What does Microsoft disclose in its FY2025 10-K?")
+        retrieve("What does Microsoft disclose in its FY2025 10-K?")
 
     results = []
     by_category = defaultdict(list)
@@ -172,23 +187,29 @@ def main():
     for number, question in enumerate(questions, start=1):
         started = perf_counter()
 
-        candidates = search(question["question"])
-        retrieved = candidates[:final_k]
+        retrieved = retrieve(question["question"])
 
         latency_ms = (perf_counter() - started) * 1000
+
+        retrieved_chunks = []
+
+        for chunk in retrieved:
+            item = {
+                "chunk_id": chunk["chunk_id"],
+                "score": chunk["score"],
+            }
+
+            if reranking:
+                item["retrieval_score"] = chunk["retrieval_score"]
+
+            retrieved_chunks.append(item)
 
         result = {
             "question_id": question["question_id"],
             "category": question["category"],
             "answerable": question["answerable"],
             "retrieval_ms": latency_ms,
-            "retrieved_chunks": [
-                {
-                    "chunk_id": chunk["chunk_id"],
-                    "score": chunk["score"],
-                }
-                for chunk in retrieved
-            ],
+            "retrieved_chunks": retrieved_chunks,
         }
 
         if method == "filtered_hybrid":
@@ -212,8 +233,7 @@ def main():
 
         print(
             f"[{number}/{len(questions)}] "
-            f"{question['question_id']} "
-            f"{latency_ms:.1f} ms",
+            f"{question['question_id']} {latency_ms:.1f} ms",
             flush=True,
         )
 
@@ -249,7 +269,7 @@ def main():
     print(json.dumps(summary["by_category"], indent=2))
 
     if method == "filtered_hybrid":
-        mismatches = [result for result in results if not result["constraints_correct"]]
+        mismatches = [r for r in results if not r["constraints_correct"]]
 
         print("\nConstraint mismatches:", len(mismatches))
 

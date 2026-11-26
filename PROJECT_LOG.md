@@ -167,3 +167,23 @@ latency. No further rule refinement.
 
 Validation: 58 tests passed; development evaluation completed.
 Results: `results/E02/`
+
+## Cross-encoder reranking (E05)
+
+Parent: E02 (`e3ac7ca`)
+Config: `configs/reranked_hybrid.yaml`
+
+Evaluated before parent-child chunking to measure reranking on
+the existing direct chunks.
+
+E02 candidate Recall@20 was 88.71%, leaving 4.84 percentage
+points of potential Recall@10 improvement.
+
+Reused the existing index and candidate pool. Checked pair lengths
+before inference to prevent silent truncation.
+
+Decision: retain E02. Reranking recovered little of the available
+recall headroom and substantially increased CPU latency.
+
+Validation: 69 tests passed; development evaluation completed.
+Results: `results/E05/`

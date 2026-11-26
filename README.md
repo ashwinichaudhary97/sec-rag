@@ -208,3 +208,30 @@ Run the filtered hybrid evaluation with:
 Metadata filtering improved retrieval quality while reducing
 p95 retrieval latency by 63.59% on the development dataset.
 Constraint extraction matched the annotations for 67 of 70 questions.
+
+### Cross-encoder reranking (E05)
+
+Evaluated a MiniLM cross-encoder on the top 20 candidates from E02,
+retaining the top 10 after reranking.
+
+| Metric | E02 | E05 |
+|---|---:|---:|
+| Recall@5 | 77.42% | 79.84% |
+| Recall@10 | 83.87% | 84.68% |
+| nDCG@5 | 0.6446 | 0.6596 |
+| nDCG@10 | 0.6736 | 0.6949 |
+| p95 retrieval latency (ms) | 31.79 | 2595.18 |
+
+Reranking improved multi-hop and table lookup Recall@10 but reduced
+single-hop Recall@10. The small overall improvement did not justify
+the additional CPU inference cost.
+
+E02 was retained for the next experiment.
+
+Reproduce:
+
+```sh
+uv run --locked python scripts/evaluate_retrieval.py --config configs/reranked_hybrid.yaml
+```
+
+Results: `results/E05/`.
