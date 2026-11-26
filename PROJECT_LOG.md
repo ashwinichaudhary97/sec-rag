@@ -122,3 +122,31 @@ the real-index retrieval smoke test passed.
 
 Development retrieval results are recorded in `results/E00/`.
 The heldout dataset was not used.
+
+## Step 5 - Hybrid retrieval (E01)
+
+Parent commit: `08355e3`
+
+Parent experiment: E00
+
+Configuration: `configs/hybrid.yaml`
+
+Added BM25 with financial-text tokenization and combined lexical
+and dense rankings using Reciprocal Rank Fusion. The existing
+chunks and dense index were reused to isolate the retrieval change.
+
+Table lookup showed a substantial improvement, with Recall@5
+increasing from 6.25% to 43.75%, although it remained the weakest
+category. Hybrid Recall@5 exceeded dense Recall@10.
+
+No question category regressed in retrieval quality. The additional
+latency was considered acceptable given the improvement in evidence
+coverage and ranking.
+
+Decision: retain hybrid retrieval.
+
+BM25 compatibility was verified, all 35 unit tests passed, and
+development retrieval evaluation completed successfully.
+
+Detailed results are stored in `results/E01/`. The corpus and
+evaluation datasets remain unchanged.

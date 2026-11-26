@@ -160,3 +160,26 @@ is evaluated on 62 answerable questions, with latency measured
 across all 70 development questions.
 
 Detailed results are stored in `results/E00/`.
+
+## Hybrid retrieval
+
+BM25 complements dense retrieval by matching financial terms and
+identifiers directly. Reciprocal Rank Fusion combines the two
+rankings without requiring comparable similarity scores.
+
+The hybrid retriever reuses the existing dense index and chunks.
+
+Run the hybrid evaluation with:
+
+    uv run --locked python scripts/evaluate_retrieval.py --config configs/hybrid.yaml
+
+| Metric | Dense (E00) | Hybrid (E01) |
+|---|---:|---:|
+| Evidence Recall@5 | 45.16% | 67.74% |
+| Evidence Recall@10 | 66.94% | 80.65% |
+| nDCG@5 | 0.3184 | 0.5102 |
+| nDCG@10 | 0.3884 | 0.5630 |
+| p95 retrieval latency | 41.02 ms | 87.31 ms |
+
+Hybrid retrieval improved evidence coverage and ranking at the
+cost of additional retrieval latency.

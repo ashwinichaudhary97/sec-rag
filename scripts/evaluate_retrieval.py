@@ -1,3 +1,4 @@
+import argparse
 import hashlib
 import json
 from collections import defaultdict
@@ -10,6 +11,7 @@ import yaml
 from sentence_transformers import SentenceTransformer
 
 from sec_rag.evaluation import evidence_recall_at_k, ndcg_at_k
+from sec_rag.hybrid import build_bm25, hybrid_search
 from sec_rag.retrieval import dense_search
 
 
@@ -48,10 +50,19 @@ def summarize(results):
 
 
 def main():
-    config = yaml.safe_load(Path("configs/baseline.yaml").read_text(encoding="utf-8"))
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--config",
+        default="configs/baseline.yaml",
+    )
+    args = parser.parse_args()
+
+    config = yaml.safe_load(Path(args.config).read_text(encoding="utf-8"))
 
     experiment_id = config["experiment_id"]
     settings = config["embedding"]
+    retrieval = config["retrieval"]
+    method = retrieval.get("method", "dense")
 
     dev_path = Path("data/eval/dev.jsonl")
 
@@ -64,7 +75,9 @@ def main():
 
     questions = load_jsonl(dev_path)
 
-    directory = Path("data/indexes") / experiment_id
+    index_experiment = config.get("index_experiment", experiment_id)
+
+    directory = Path("data/indexes") / index_experiment
 
     chunks = load_jsonl(directory / "chunks.jsonl")
     index = faiss.read_index(str(directory / "index.faiss"))
@@ -78,17 +91,44 @@ def main():
         device=settings["device"],
     )
 
-    candidate_k = config["retrieval"]["candidate_k"]
-    final_k = config["retrieval"]["final_k"]
+    candidate_k = retrieval["candidate_k"]
+    final_k = retrieval["final_k"]
 
-    # Warm up the model before measuring retrieval latency.
-    dense_search(
-        "What does a company disclose in its annual report?",
-        model,
-        index,
-        chunks,
-        k=candidate_k,
-    )
+    if method == "hybrid":
+        print("Building BM25 index...", flush=True)
+        bm25 = build_bm25(chunks)
+
+        def search(question):
+            return hybrid_search(
+                question,
+                model,
+                index,
+                bm25,
+                chunks,
+                k=candidate_k,
+                rrf_constant=retrieval["rrf_constant"],
+            )
+
+    elif method == "dense":
+
+        def search(question):
+            return dense_search(
+                question,
+                model,
+                index,
+                chunks,
+                k=candidate_k,
+            )
+
+    else:
+        raise ValueError(f"Unknown retrieval method: {method}")
+
+    print("Experiment:", experiment_id)
+    print("Retrieval method:", method)
+    print("Indexed chunks:", len(chunks))
+
+    # Warm up before measuring retrieval latency.
+    search("What does a company disclose in its annual report?")
 
     results = []
     by_category = defaultdict(list)
@@ -96,14 +136,7 @@ def main():
     for number, question in enumerate(questions, start=1):
         started = perf_counter()
 
-        candidates = dense_search(
-            question["question"],
-            model,
-            index,
-            chunks,
-            k=candidate_k,
-        )
-
+        candidates = search(question["question"])
         retrieved = candidates[:final_k]
 
         latency_ms = (perf_counter() - started) * 1000
@@ -172,7 +205,7 @@ def main():
     print(json.dumps(summary["by_category"], indent=2))
 
     print("\nResults saved to:", output)
-    print("E00 retrieval evaluation: PASS")
+    print(f"{experiment_id} retrieval evaluation: PASS")
 
 
 if __name__ == "__main__":

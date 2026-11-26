@@ -10,6 +10,7 @@ requires-python = ">=3.11"
 dependencies = [
     "faiss-cpu>=1.16.0",
     "pyyaml==6.0.4",
+    "rank-bm25>=0.2.2",
     "scikit-learn>=1.9.1",
     "sec2md==0.1.25",
     "sentence-transformers>=6.3.0",

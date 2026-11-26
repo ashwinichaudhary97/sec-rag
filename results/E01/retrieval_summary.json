@@ -1,0 +1,84 @@
+{
+  "experiment_id": "E01",
+  "split": "dev",
+  "dataset_sha256": "09977be282f26ade4595b0444424780093f0afb84cf719b1972c59198ea00238",
+  "config": {
+    "experiment_id": "E01",
+    "parent_experiment": "E00",
+    "index_experiment": "E00",
+    "embedding": {
+      "model_id": "sentence-transformers/all-MiniLM-L6-v2",
+      "revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+      "device": "cpu",
+      "batch_size": 32,
+      "normalize": true
+    },
+    "chunking": {
+      "max_tokens": 224
+    },
+    "retrieval": {
+      "index_type": "IndexFlatIP",
+      "method": "hybrid",
+      "candidate_k": 20,
+      "final_k": 10,
+      "rrf_constant": 60
+    }
+  },
+  "indexed_chunks": 7807,
+  "overall": {
+    "questions": 70,
+    "answerable_questions": 62,
+    "p95_retrieval_ms": 87.31395003269425,
+    "recall_at_5": 0.6774193548387096,
+    "recall_at_10": 0.8064516129032258,
+    "ndcg_at_5": 0.5102240640983368,
+    "ndcg_at_10": 0.5630170623417614
+  },
+  "by_category": {
+    "adversarial": {
+      "questions": 12,
+      "answerable_questions": 4,
+      "p95_retrieval_ms": 73.35066004889086,
+      "recall_at_5": 0.5,
+      "recall_at_10": 0.5,
+      "ndcg_at_5": 0.4693038288345124,
+      "ndcg_at_10": 0.4693038288345124
+    },
+    "exact_term": {
+      "questions": 14,
+      "answerable_questions": 14,
+      "p95_retrieval_ms": 75.49122002674267,
+      "recall_at_5": 0.9285714285714286,
+      "recall_at_10": 1.0,
+      "ndcg_at_5": 0.721124294921456,
+      "ndcg_at_10": 0.734940466608404
+    },
+    "multi_hop": {
+      "questions": 14,
+      "answerable_questions": 14,
+      "p95_retrieval_ms": 99.94260003441013,
+      "recall_at_5": 0.6428571428571429,
+      "recall_at_10": 0.7857142857142857,
+      "ndcg_at_5": 0.5140855519900616,
+      "ndcg_at_10": 0.5899319401228802
+    },
+    "single_hop": {
+      "questions": 14,
+      "answerable_questions": 14,
+      "p95_retrieval_ms": 86.66457002400419,
+      "recall_at_5": 0.7857142857142857,
+      "recall_at_10": 1.0,
+      "ndcg_at_5": 0.5880708845834395,
+      "ndcg_at_10": 0.6735717976961116
+    },
+    "table_lookup": {
+      "questions": 16,
+      "answerable_questions": 16,
+      "p95_retrieval_ms": 79.90097507718019,
+      "recall_at_5": 0.4375,
+      "recall_at_10": 0.5625,
+      "ndcg_at_5": 0.2644216511143392,
+      "ndcg_at_10": 0.31572648049172647
+    }
+  }
+}
