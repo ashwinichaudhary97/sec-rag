@@ -183,3 +183,28 @@ Run the hybrid evaluation with:
 
 Hybrid retrieval improved evidence coverage and ranking at the
 cost of additional retrieval latency.
+
+## Metadata filtering
+
+Company aliases and explicit filing-year references are extracted
+using rule-based patterns. Financial reporting periods are not
+treated as filing-year constraints.
+
+Both dense and BM25 retrieval are restricted to eligible chunks
+before candidate ranking.
+
+Run the filtered hybrid evaluation with:
+
+    uv run --locked python scripts/evaluate_retrieval.py --config configs/filtered_hybrid.yaml
+
+| Metric | Hybrid (E01) | Filtered hybrid (E02) |
+|---|---:|---:|
+| Evidence Recall@5 | 67.74% | 77.42% |
+| Evidence Recall@10 | 80.65% | 83.87% |
+| nDCG@5 | 0.5102 | 0.6446 |
+| nDCG@10 | 0.5630 | 0.6736 |
+| p95 retrieval latency | 87.31 ms | 31.79 ms |
+
+Metadata filtering improved retrieval quality while reducing
+p95 retrieval latency by 63.59% on the development dataset.
+Constraint extraction matched the annotations for 67 of 70 questions.

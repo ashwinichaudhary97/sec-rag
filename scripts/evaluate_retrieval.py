@@ -11,7 +11,12 @@ import yaml
 from sentence_transformers import SentenceTransformer
 
 from sec_rag.evaluation import evidence_recall_at_k, ndcg_at_k
+from sec_rag.filtered_retrieval import (
+    filtered_hybrid_search,
+    load_embeddings,
+)
 from sec_rag.hybrid import build_bm25, hybrid_search
+from sec_rag.metadata import extract_constraints
 from sec_rag.retrieval import dense_search
 
 
@@ -21,6 +26,12 @@ def load_jsonl(path):
         for line in path.read_text(encoding="utf-8").splitlines()
         if line.strip()
     ]
+
+
+def compare_constraints(predicted, expected):
+    return all(
+        set(predicted[key]) == set(expected[key]) for key in ("tickers", "filing_years")
+    )
 
 
 def summarize(results):
@@ -44,6 +55,11 @@ def summarize(results):
             float(np.mean([result[metric] for result in answerable]))
             if answerable
             else None
+        )
+
+    if "constraints_correct" in results[0]:
+        summary["constraint_accuracy"] = float(
+            np.mean([result["constraints_correct"] for result in results])
         )
 
     return summary
@@ -94,9 +110,26 @@ def main():
     candidate_k = retrieval["candidate_k"]
     final_k = retrieval["final_k"]
 
-    if method == "hybrid":
+    if method in ("hybrid", "filtered_hybrid"):
         print("Building BM25 index...", flush=True)
         bm25 = build_bm25(chunks)
+
+    if method == "filtered_hybrid":
+        embeddings = load_embeddings(index, chunks)
+
+        def search(question):
+            return filtered_hybrid_search(
+                question,
+                model,
+                index,
+                embeddings,
+                bm25,
+                chunks,
+                k=candidate_k,
+                rrf_constant=retrieval["rrf_constant"],
+            )
+
+    elif method == "hybrid":
 
         def search(question):
             return hybrid_search(
@@ -130,6 +163,9 @@ def main():
     # Warm up before measuring retrieval latency.
     search("What does a company disclose in its annual report?")
 
+    if method == "filtered_hybrid":
+        search("What does Microsoft disclose in its FY2025 10-K?")
+
     results = []
     by_category = defaultdict(list)
 
@@ -154,6 +190,14 @@ def main():
                 for chunk in retrieved
             ],
         }
+
+        if method == "filtered_hybrid":
+            predicted = extract_constraints(question["question"])
+            expected = question["expected_constraints"]
+
+            result["extracted_constraints"] = predicted
+            result["expected_constraints"] = expected
+            result["constraints_correct"] = compare_constraints(predicted, expected)
 
         if question["answerable"]:
             gold = question["gold_evidence"]
@@ -203,6 +247,20 @@ def main():
 
     print("\nResults by category")
     print(json.dumps(summary["by_category"], indent=2))
+
+    if method == "filtered_hybrid":
+        mismatches = [result for result in results if not result["constraints_correct"]]
+
+        print("\nConstraint mismatches:", len(mismatches))
+
+        for result in mismatches:
+            print(
+                result["question_id"],
+                "expected:",
+                result["expected_constraints"],
+                "extracted:",
+                result["extracted_constraints"],
+            )
 
     print("\nResults saved to:", output)
     print(f"{experiment_id} retrieval evaluation: PASS")

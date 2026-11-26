@@ -150,3 +150,20 @@ development retrieval evaluation completed successfully.
 
 Detailed results are stored in `results/E01/`. The corpus and
 evaluation datasets remain unchanged.
+
+## Step 6 - Metadata filtering (E02)
+
+Parent: E01 (`743503a`)
+Config: `configs/filtered_hybrid.yaml`
+
+Reused the existing index and chunks. Both retrieval branches
+rank only eligible chunks, retaining corpus-wide BM25 statistics.
+
+All company constraints matched the annotations. Three filing-year
+constraints were missed, resulting in broader searches.
+
+Decision: retain E02 for improved retrieval quality and lower
+latency. No further rule refinement.
+
+Validation: 58 tests passed; development evaluation completed.
+Results: `results/E02/`
