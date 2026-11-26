@@ -68,3 +68,12 @@ Development:
 
 Heldout:
 e04b947d06a37a4a128f681aad636cb878028214142f636ed1969b5838a99129
+
+## Step 3 - Retrieval evaluation metrics
+
+- Implemented evidence matching and Evidence Recall@K.
+- Used scikit-learn 1.9.1 for nDCG@K.
+- Selected @10 as the primary cutoff and @5 as the secondary cutoff.
+- Tested accession matching, span containment, alternative evidence
+  locations, recall cutoffs and nDCG normalization.
+- All 15 unit tests passed, including 9 retrieval evaluation tests.

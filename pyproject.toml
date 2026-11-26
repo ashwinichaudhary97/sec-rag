@@ -8,6 +8,7 @@ authors = [
 ]
 requires-python = ">=3.11"
 dependencies = [
+    "scikit-learn>=1.9.1",
     "sec2md==0.1.25",
 ]
 

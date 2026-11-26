@@ -111,3 +111,18 @@ Questions were prepared with LLM assistance and manually verified
 in two separate review passes within a week. Reference answers and
 supporting evidence were checked against the original SEC filings.
 Both splits were frozen after structural validation and overlap checks.
+
+## Retrieval evaluation
+
+Retrieval quality is measured using Evidence Recall@5, Evidence
+Recall@10, nDCG@5 and nDCG@10.
+
+Evidence recall measures the fraction of required gold evidence
+units retrieved. A chunk matches an evidence location when its
+accession matches and its source span fully contains the gold span.
+Alternative locations for the same evidence unit count only once.
+
+nDCG uses binary chunk relevance and scikit-learn's ndcg_score,
+with the ideal ranking based on relevance across the complete index.
+
+Retrieval quality metrics apply to answerable questions.
